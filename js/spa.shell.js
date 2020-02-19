@@ -264,21 +264,24 @@ spa.shell = (function () {
     jqueryMap.$chat
       .attr('title', configMap.chat_retracted_title)
       .click(onClickChat);
-  };
+    
+      //我々のスキーマを使うようにuriAnchorを設定する
+    $.uriAnchor.configModule({
+      schema_map: configMap.anchor_schema_map
+    });
+    // 機能モジュールを構成して初期化する
+    spa.chat.configModule( {} );
+    spa.chat.initModule(jqueryMap.$chat);
 
-  //我々のスキーマを使うようにuriAnchorを設定する
-  $.uriAnchor.configModule({
-    schema_map: configMap.anchor_schema_map
-  });
-
-  // URIアンカーの編億イベントを処理する
-  // これはすべての機能モジュールを設定して初期化した後に行う。
-  // そうしないと。トリガーイベントを処理できる状態になっていない。
-  // トリガーイベントはアンカーがロード状態とみなせることを保証する為に使う。
-  //
-  $(window)
-    .bind('hashchange', onHashchange)
-    .trigger('hashchangee');
+    // URIアンカーの編億イベントを処理する
+    // これはすべての機能モジュールを設定して初期化した後に行う。
+    // そうしないと。トリガーイベントを処理できる状態になっていない。
+    // トリガーイベントはアンカーがロード状態とみなせることを保証する為に使う。
+    //
+    $(window)
+      .bind('hashchange', onHashchange)
+      .trigger('hashchangee');
+    };
   // パブリックメソッド/initModule/終了
   return { initModule: initModule };
   //----------------------パブリックメソッド終了---------------------
