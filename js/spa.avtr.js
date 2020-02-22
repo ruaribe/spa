@@ -1,7 +1,8 @@
-/*
-  spa.model.js
-  モデルモジュール
+/**
+ * spa.avtr.js
+ * アバター機能モジュール
 */
+
 /*jslint browser : true, continue :true,
   devel : true, indent : 2, maxerr :50,
   newcap : true, nomen : true, plusplus : true,
@@ -9,4 +10,4 @@
   white : true
 */
 /*global $, spa:true */
-spa.model = (function () { return {}; }());
+spa.avtr = (function () { return {}; }());
