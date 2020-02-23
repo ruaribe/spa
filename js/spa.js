@@ -12,6 +12,7 @@
 
 const spa = (function () {
   const initModule = function ($container) {
+    spa.model.initModule();
     spa.shell.initModule($container);
   };
 

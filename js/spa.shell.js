@@ -10,6 +10,7 @@
  */
 /*global $, spa:true */
 spa.shell = (function () {
+  'use strict';
   //---------------モジュールスコープ変数開始---------------------
   let
     configMap = {
@@ -19,7 +20,10 @@ spa.shell = (function () {
       resize_interval: 200,
       main_html: String()
         + '<div class="spa-shell-head">'
-          + '<div class="spa-shell-head-logo"></div>'
+          + '<div class="spa-shell-head-logo">'
+            + '<h1>SPA</h1>'
+            + '<p>javascript end to end</p>'
+          + '</div>'
           + '<div class="spa-shell-head-acct"></div>'
           + '<div class="spa-shell-head-search"></div>'
         + '</div>'
@@ -38,7 +42,8 @@ spa.shell = (function () {
     jqueryMap = {},
 
     copyAnchorMap, setJqueryMap, 
-    changeAnchorPart, onHashchange, onResize,
+    changeAnchorPart, onResize, onHashchange,
+    onTapAcct, onLogin, onLogout,
     setChatAnchor, initModule;
   //--------------モジュールスコープ変数終了--------------------------
 
@@ -54,7 +59,9 @@ spa.shell = (function () {
   setJqueryMap = function () {
     let $container = stateMap.$container;
     jqueryMap = {
-      $container: $container
+      $container: $container,
+      $acct: $container.find('.spa-shell-head-acct'),
+      $nav: $container.find('.spa-shell-main-nav')
     };
   };
   // DOMメソッド /setJqueryMap/ 終了
@@ -203,6 +210,33 @@ spa.shell = (function () {
   };
   // イベントハンドラ/onResize/終了
 
+  // イベントハンドラ/onTapAcct/開始
+  onTapAcct = function () {
+    let acct_text, user_name, user = spa.model.people.get_user();
+    if ( user.get_is_anon() ) {
+      user_name = prompt('Please sign-in');
+      spa.model.people.login(user_name);
+      jqueryMap.$acct.text('...processing...');
+    }
+    else {
+      spa.model.people.logout();
+    }
+    return false;
+  };
+  // イベントハンドラ/onTapAcct/終了
+
+  // イベントハンドラ/onLogin/開始
+  onLogin = function (event, login_user) {
+    jqueryMap.$acct.text(login_user.name);
+  }
+  // イベントハンドラ/onLogin/終了
+
+  // イベントハンドラ/onLogout/開始
+  onLogout = function () {
+    jqueryMap.$acct.text('Please sign-in');
+  };
+  // イベントハンドラ/onLogout/終了
+
   //----------------------イベントハンドラ終了-----------------------
 
   //----------------------コールバック開始---------------------------
@@ -265,7 +299,14 @@ spa.shell = (function () {
       .bind('resize', onResize)
       .bind('hashchange', onHashchange)
       .trigger('hashchange');
-    };
+    
+    $.gevent.subscribe($container, 'spa-login', onLogin);
+    $.gevent.subscribe($container, 'spa-logout', onLogout);
+
+    jqueryMap.$acct
+      .text('Please sign-in')
+      .bind('utap', onTapAcct);
+  };
   // パブリックメソッド/initModule/終了
   return { initModule: initModule };
   //----------------------パブリックメソッド終了---------------------
