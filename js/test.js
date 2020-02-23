@@ -1,28 +1,25 @@
 let $t = $('<div/>');
 
-$.gevent.subscribe($t, 'spa-login', function () {
-  console.log('Hello!', arguments);
+$.gevent.subscribe($t, 'spa-login', function (event, user) {
+  console.log('Hello!', user.name);
 });
 
-$.gevent.subscribe($t, 'spa-logout', function () {
-  console.log('*Listchange', arguments);
+
+$.gevent.subscribe($t, 'spa-listchange',
+  function (event, changed_list) {
+    console.log('*Listchange:', changed_list);
 });
 
-let currentUser = spa.model.people.get_user();
+spa.model.people.login('jessy');
 
-currentUser.get_is_anon();
+let person = spa.model.people.get_by_cid('id_03');
 
-spa.model.chat.join();
+JSON.stringify(person.css_map);
 
-spa.model.people.login('Fred');
+spa.model.chat.update_avatar({
+  person_id: 'id_03', css_map: {}
+});
 
-let peopleDb = spa.model.people.get_db();
+person = spa.model.people.get_by_cid('id_03');
 
-peopleDb().each(function (person, idx) { console.log(person.name); });
-
-spa.model.chat.join();
-
-//ほぼ即座にspa-listchangeイベントが発行される
-
-peopleDb = spa.model.people.get_db();
-peopleDb().each(function (person, idx) { console.log(person.name); });
+JSON.stringify(person.css_map);

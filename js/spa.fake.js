@@ -53,7 +53,7 @@ spa.fake = (function () {
 
   mockSio = (function () {
     let
-      on_sio, emit_sio,
+      on_sio, emit_sio, emit_mock_msg,
       send_listchange, listchange_idto,
       callback_map = {};
 
@@ -62,7 +62,7 @@ spa.fake = (function () {
     };
 
     emit_sio = function (msg_type, data) {
-      let person_map;
+      let person_map, i;
       
       // 3秒間の遅延後に「userupdate」コールバックで
       // 「adduser」イベントに応答する
@@ -78,6 +78,60 @@ spa.fake = (function () {
           callback_map.userupdate([person_map]);
         }, 3000);
       }
+
+      // 2秒間の遅延後に「updatechat」コールバックで
+      // 「updatechat」イベントに応対する。ユーザ情報を送り返す。
+      if (msg_type === 'updatechat' && callback_map.updatechat) {
+        setTimeout(function () {
+          let user = spa.model.people.get_user();
+          callback_map.updatechat([{
+            dest_id: user.id,
+            dest_name: user.name,
+            sender_id: data.dest_id,
+            msg_text: 'Thanks for the note, ' + user.name
+          }]);
+        },2000);
+      }
+
+      if (msg_type === 'leavechat') {
+        // ログイン状態をリセットする
+        delete callback_map.listchange;
+        delete callback_map.updatechat;
+
+        if (listchange_idto) {
+          clearTimeout(listchange_idto);
+          listchange_idto = undefined;
+        }
+        send_listchange();
+      }
+
+      // サーバへの「updateavatar」メッセージとデータの送信をシミュレートする
+      if (msg_type === 'updateavatar' && callback_map.listchange) {
+        // 「listchange」メッセージの受信をシミュレートする
+        for (i = 0; i < peopleList.length; i++){
+          if (peopleList[i]._id === data.person_id) {
+            peopleList[i].css_map = data.css_map;
+            break; 
+          }
+        }
+        //「listchange」メッセージ用のコールバックを実行する
+        callback_map.listchange([peopleList]);
+      }
+    };
+
+    emit_mock_msg = function () {
+      setTimeout(function () {
+        let user = spa.model.people.get_user();
+        if (callback_map.updatechat) {
+          callback_map.updatechat([{
+            dest_id: user.id,
+            dest_name: user.name,
+            sender_id: 'id_04',
+            msg_text: 'Hi there ' + user.name + '! Wilma here.'
+          }]);
+        }
+        else { emit_mock_msg(); }
+      }, 8000);
     };
 
     // 1秒に1回listchangeコールバック関数を使うようにする。
@@ -86,6 +140,7 @@ spa.fake = (function () {
       listchange_idto = setTimeout(function () {
         if (callback_map.listchange ) {
           callback_map.listchange([peopleList]);
+          emit_mock_msg();
           listchange_idto = undefined;
         }
         else { send_listchange(); }
