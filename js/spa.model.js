@@ -22,7 +22,7 @@ spa.model = (function () {
       user: null
     },
     
-    isFakeData = true,
+    isFakeData = false,
     personProto, makeCid, clearPeopleDb, completeLogin,
     makePerson, removePerson, people, chat, initModule;
   
@@ -170,7 +170,6 @@ spa.model = (function () {
       clearPeopleDb();
   
       $.gevent.publish('spa-logout', [user]);
-      return is_removed;
     };
 
     return {
